@@ -1222,7 +1222,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
-                yield local_folder.detach_single_email_async(owned_id, out marked, null);
+                yield local_folder.detach_single_email_async(owned_id, null, out marked);
             } catch (Error err) {
                 debug("%s do_replay_removed_message: unable to remove message #%s: %s", to_string(),
                     remote_position.to_string(), err.message);

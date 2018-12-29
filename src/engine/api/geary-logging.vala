@@ -35,6 +35,51 @@ public enum Flag {
     public inline bool is_any_set(Flag flags) {
         return (flags & this) != 0;
     }
+
+    public string to_string() {
+        GLib.StringBuilder buf = new GLib.StringBuilder();
+        if (this == ALL) {
+            buf.append("ALL");
+        } else if (this == NONE) {
+            buf.append("NONE");
+        } else {
+            if (this.is_any_set(NETWORK)) {
+                buf.append("NET");
+            }
+            if (this.is_any_set(SERIALIZER)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("SER");
+            }
+            if (this.is_any_set(REPLAY)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("REPLAY");
+            }
+            if (this.is_any_set(SQL)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("SQL");
+            }
+            if (this.is_any_set(FOLDER_NORMALIZATION)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("NORM");
+            }
+            if (this.is_any_set(DESERIALIZER)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("DESER");
+            }
+        }
+        return buf.str;
+    }
+
 }
 
 private int init_count = 0;
@@ -168,6 +213,88 @@ public void default_handler(string? domain,
         entry_timer.start();
     }
 }
+
+public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags log_levels,
+                                               GLib.LogField[] fields) {
+    unowned FileStream? out = stream;
+    if (out != null ||
+        ((LogLevelFlags.LEVEL_WARNING & log_levels) > 0) ||
+        ((LogLevelFlags.LEVEL_CRITICAL & log_levels) > 0)  ||
+        ((LogLevelFlags.LEVEL_ERROR & log_levels) > 0)) {
+
+        if (out == null) {
+            out = GLib.stderr;
+        }
+
+        string domain = "default";
+        Flag flag = Flag.NONE;
+        string message = "[no message]";
+
+        string[] strings = new string[fields.length];
+        uint string_count = 0;
+
+        foreach (GLib.LogField field in fields) {
+            switch (field.key.ascii_up()) {
+            case "GLIB_DOMAIN":
+                if (field.length < 0) {
+                    domain = (string) field.value;
+                }
+                break;
+            case "MESSAGE":
+                if (field.length < 0) {
+                    message = (string) field.value;
+                }
+                break;
+            case "PRIORITY":
+                // noop, we get it from the args
+                break;
+            case "GEARY_FLAGS":
+                flag = (Flag) field.value;
+                break;
+            default:
+                string? string_value = null;
+                if (field.length < 0) {
+                    string_value = (string) field.value;
+                } else {
+                    Loggable? loggable = field.value as Loggable;
+                    if (loggable != null) {
+                        string_value = loggable.to_string();
+                    }
+                }
+                if (string_value != null) {
+                    strings[string_count++] = string_value;
+                }
+                break;
+            }
+        }
+
+        GLib.Time tm = GLib.Time.local(time_t());
+        out.printf(
+            "%s %02d:%02d:%02d %lf %s",
+            to_prefix(log_levels),
+            tm.hour, tm.minute, tm.second,
+            entry_timer.elapsed(),
+            domain
+        );
+
+        if (flag != ALL && flag != NONE) {
+            out.printf("[%s]: ", flag.to_string());
+        } else {
+            out.puts(": ");
+        }
+
+        for (int i = 0; i < string_count; i++) {
+            out.puts(strings[i]);
+            out.putc(' ');
+        }
+        out.puts(message);
+        out.putc('\n');
+        entry_timer.start();
+    }
+
+    return GLib.LogWriterOutput.HANDLED;
+}
+
 
 private inline string to_prefix(LogLevelFlags level) {
     switch (level) {

@@ -17,6 +17,54 @@
  */
 public interface Geary.Loggable : GLib.Object {
 
+    protected struct Context {
+
+        // 8 fields ought to be enough for anybody...
+        private const uint8 FIELD_COUNT = 8;
+
+        public GLib.LogField[] fields;
+        public uint8 len;
+        public uint8 count;
+
+        Context(string domain,
+                Logging.Flag flags,
+                GLib.LogLevelFlags levels,
+                string message,
+                va_list args) {
+            this.fields = new GLib.LogField[FIELD_COUNT];
+            this.len = FIELD_COUNT;
+            this.count = 0;
+            append("PRIORITY", levels);
+            append("GLIB_DOMAIN", domain);
+            append("GEARY_FLAGS", flags);
+            append("MESSAGE", message.vprintf(args));
+
+            GLib.debug("XXX context: %s", message.vprintf(args));
+        }
+
+        public void append<T>(string key, T value) {
+            uint8 count = this.count;
+            if (count + 1 >= this.len) {
+                this.fields.resize(this.len + FIELD_COUNT);
+            }
+
+            this.fields[count].key = key;
+            this.fields[count].value = value;
+            this.fields[count].length = (typeof(T) == typeof(string)) ? -1 : 0;
+
+            this.count++;
+        }
+
+        public inline void append_instance<T>(T value) {
+            this.append(typeof(T).name(), value);
+        }
+
+        public GLib.LogField[] to_array() {
+            return this.fields[0:this.count];
+        }
+
+    }
+
 
     /**
      * Default flags to use for this loggable when logging messages.
@@ -92,15 +140,15 @@ public interface Geary.Loggable : GLib.Object {
                                        GLib.LogLevelFlags levels,
                                        string fmt,
                                        va_list args) {
-        GLib.StringBuilder message = new GLib.StringBuilder(fmt);
-        Loggable? decorator = this;
-        while (decorator != null) {
-            message.prepend_c(' ');
-            message.prepend(decorator.to_string());
-            decorator = decorator.loggable_parent;
+        GLib.debug("XXX log call: %s", fmt.vprintf(args));
+        Context context = Context(Logging.DOMAIN, flags, levels, fmt, va_list.copy(args));
+        Loggable? decorated = this;
+        while (decorated != null) {
+            context.append_instance(decorated);
+            decorated = decorated.loggable_parent;
         }
 
-        Logging.logv(flags, levels, message.str, args);
+        GLib.log_structured_array(levels, context.to_array());
     }
 
 }

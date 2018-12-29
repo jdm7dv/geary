@@ -201,8 +201,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         // this, but it's easy and works for now
         int attempts = 0;
         while (this.all_sessions.size > 0) {
-            debug("[%s] Waiting for client sessions to disconnect...",
-                  this.account.id);
+            debug("Waiting for client sessions to disconnect...");
             Timeout.add(250, this.stop.callback);
             yield;
 
@@ -271,8 +270,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         // Don't check_open(), it's valid for this to be called when
         // is_running is false, that happens during mop-up
 
-        debug("[%s] Returning session with %d of %d free",
-              this.account.id, this.free_queue.size, this.all_sessions.size);
+        debug("Returning session with %d of %d free",
+              this.free_queue.size, this.all_sessions.size);
 
         bool too_many_free = (
             this.free_queue.size >= this.max_free_size &&
@@ -293,8 +292,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 try {
                     yield session.close_mailbox_async(pool_cancellable);
                 } catch (ImapError imap_error) {
-                    debug("[%s] Error attempting to close released session %s: %s",
-                          this.account.id, session.to_string(), imap_error.message);
+                    debug("Error attempting to close released session %s: %s",
+                          session.to_string(), imap_error.message);
                     free = false;
                 }
 
@@ -307,8 +306,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             }
 
             if (free) {
-                debug("[%s] Unreserving session %s",
-                      this.account.id, session.to_string());
+                debug("Unreserving session %s", session.to_string());
                 this.free_queue.send(session);
             }
         }
@@ -356,8 +354,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 });
             this.free_queue.send(free);
         } catch (Error err) {
-            debug("[%s] Error adding new session to the pool: %s",
-                  this.account.id, err.message);
+            debug("Error adding new session to the pool: %s", err.message);
             this.close_pool.begin();
         }
     }
@@ -385,8 +382,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             try {
                 yield remove_session_async(target);
             } catch (Error err) {
-                debug("[%s] Error removing unconnected session: %s",
-                      this.account.id, err.message);
+                debug("Error removing unconnected session: %s", err.message);
             }
             break;
 
@@ -424,7 +420,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        debug("[%s] Opening new session", this.account.id);
+        debug("Opening new session");
         ClientSession new_session = new ClientSession(remote);
 
         // Listen for auth failures early so the client is notified if
@@ -455,8 +451,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             try {
                 yield new_session.disconnect_async();
             } catch (Error disconnect_err) {
-                debug("[%s] Error disconnecting due to session initiation failure, ignored: %s",
-                    new_session.to_string(), disconnect_err.message);
+                debug("Error disconnecting due to session initiation failure, ignored: %s",
+                      disconnect_err.message);
             }
 
             throw err;

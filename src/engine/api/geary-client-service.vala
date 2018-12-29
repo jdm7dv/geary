@@ -14,7 +14,7 @@
  * configuration and life-cycle of client sessions that do connect to
  * the service.
  */
-public abstract class Geary.ClientService : BaseObject {
+public abstract class Geary.ClientService : BaseObject, Loggable {
 
 
     /**
@@ -34,6 +34,15 @@ public abstract class Geary.ClientService : BaseObject {
 
     /** Determines if this manager has been started. */
     public bool is_running { get; protected set; default = false; }
+    /** {@inheritDoc} */
+    public Logging.Flag loggable_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Loggable? loggable_parent { get { return _loggable_parent; } }
+    private weak Loggable? _loggable_parent = null;
+
 
 
     protected ClientService(AccountInformation account,
@@ -90,6 +99,18 @@ public abstract class Geary.ClientService : BaseObject {
     public abstract async void stop(GLib.Cancellable? cancellable = null)
         throws GLib.Error;
 
+    /** {@inheritDoc} */
+    public virtual string to_string() {
+        return "%s(%s)".printf(
+            this.get_type().name(),
+            this.configuration.protocol.to_value()
+        );
+    }
+
+    /** Sets the service's logging parent. */
+    internal void set_loggable_parent(Loggable parent) {
+        this._loggable_parent = parent;
+    }
 
     private void on_untrusted_host(TlsNegotiationMethod method,
                                    GLib.TlsConnection cx) {

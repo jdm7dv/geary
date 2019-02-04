@@ -270,8 +270,8 @@ private class Geary.Imap.Account : BaseObject {
     
     // By supplying fallback STATUS, the Folder may be fetched if a network error occurs; if null,
     // the network error is thrown
-    public async Imap.Folder fetch_folder_async(FolderPath path, out bool created,
-        StatusData? fallback_status_data, Cancellable? cancellable) throws Error {
+    public async Imap.Folder fetch_folder_async(FolderPath path, StatusData? fallback_status_data,
+                                                Cancellable? cancellable, out bool created) throws Error {
         check_open();
         
         created = false;
@@ -357,8 +357,8 @@ private class Geary.Imap.Account : BaseObject {
         }
     }
     
-    public async void fetch_counts_async(FolderPath path, out int unseen, out int total,
-        Cancellable? cancellable) throws Error {
+    public async void fetch_counts_async(FolderPath path, Cancellable? cancellable,
+                                         out int unseen, out int total) throws Error {
         check_open();
         
         MailboxInformation? mailbox_info = path_to_mailbox.get(path);

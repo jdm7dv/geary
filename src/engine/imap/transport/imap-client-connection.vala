@@ -657,7 +657,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 synchronization_status_response = null;
                 
                 Tag? synchronize_tag;
-                yield ser.flush_async(is_synchronized, out synchronize_tag);
+                yield ser.flush_async(is_synchronized, null, out synchronize_tag);
                 
                 // if no tag returned, all done, otherwise synchronization required
                 if (synchronize_tag == null)
@@ -727,7 +727,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 idle_cmd.serialize(ser, idle_cmd.tag);
                 
                 Tag? synchronize_tag;
-                yield ser.flush_async(false, out synchronize_tag);
+                yield ser.flush_async(false, null, out synchronize_tag);
                 
                 // flushing IDLE should never require synchronization
                 assert(synchronize_tag == null);

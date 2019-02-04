@@ -186,8 +186,8 @@ public class Geary.Imap.Serializer : BaseObject {
      * flush_async() again with is_synchronized set to true.  The tag is supplied to watch for
      * an error condition from the server (which may reject the synchronization request).
      */
-    public async void flush_async(bool is_synchronized, out Tag? synchronize_tag,
-        Cancellable? cancellable = null) throws Error {
+    public async void flush_async(bool is_synchronized, Cancellable? cancellable = null,
+                                  out Tag? synchronize_tag) throws Error {
         synchronize_tag = null;
         
         // commit the last buffer to the queue (although this is best done with push_end_message)

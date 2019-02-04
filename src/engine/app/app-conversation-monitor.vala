@@ -575,8 +575,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.MultiMap<Geary.App.Conversation, Geary.Email>? appended = null;
         Gee.Collection<Conversation>? removed_due_to_merge = null;
         try {
-            yield conversations.add_all_emails_async(job.emails.values, this, folder.path, out added, out appended,
-                out removed_due_to_merge, null);
+            yield conversations.add_all_emails_async(job.emails.values, this, folder.path, null,
+                out added, out appended, out removed_due_to_merge);
         } catch (Error err) {
             debug("Unable to add emails to conversation: %s", err.message);
             
@@ -631,7 +631,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<Geary.App.Conversation> removed;
         Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
         yield conversations.remove_emails_and_check_in_folder_async(removed_ids, folder.account,
-            folder.path, out removed, out trimmed, null);
+            folder.path, null, out removed, out trimmed);
         
         foreach (Conversation conversation in trimmed.get_keys())
             notify_conversation_trimmed(conversation, trimmed.get(conversation));
@@ -684,7 +684,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.EmailIdentifier? earliest_id = null;
         try {
             yield folder.find_boundaries_async(conversations.get_email_identifiers(),
-                out earliest_id, null, cancellable);
+                                               cancellable, out earliest_id, null);
         } catch (Error e) {
             debug("Error finding earliest email identifier: %s", e.message);
         }

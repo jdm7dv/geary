@@ -315,8 +315,8 @@ private class Geary.Imap.Folder : BaseObject {
     // FETCH commands can generate a FolderError.RETRY.  State will be updated to accomodate retry,
     // but all Commands must be regenerated to ensure new state is reflected in requests.
     private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
-        out Gee.HashMap<SequenceNumber, FetchedData>? fetched, out Gee.Set<Imap.UID>? search_results,
-        Cancellable? cancellable) throws Error {
+                                                                        Cancellable? cancellable,
+        out Gee.HashMap<SequenceNumber, FetchedData>? fetched, out Gee.Set<Imap.UID>? search_results) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         Gee.Map<Command, StatusResponse>? responses = null;
         // execute commands with mutex locked
@@ -434,8 +434,8 @@ private class Geary.Imap.Folder : BaseObject {
         SearchCommand cmd = new SearchCommand.uid(criteria);
         
         Gee.Set<Imap.UID>? search_results;
-        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), null, out search_results,
-            cancellable);
+        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), cancellable,
+                                  null, out search_results);
         
         return (search_results != null && search_results.size > 0) ? search_results : null;
     }
@@ -548,7 +548,7 @@ private class Geary.Imap.Folder : BaseObject {
             
             // Commands prepped, do the fetch and accumulate all the responses
             try {
-                yield exec_commands_async(cmds, out fetched, null, cancellable);
+                yield exec_commands_async(cmds, cancellable, out fetched, null);
             } catch (Error err) {
                 if (err is FolderError.RETRY) {
                     debug("Retryable server failure detected for %s: %s", to_string(), err.message);
@@ -614,7 +614,7 @@ private class Geary.Imap.Folder : BaseObject {
         cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
-        yield exec_commands_async(cmds, out fetched, null, cancellable);
+        yield exec_commands_async(cmds, cancellable, out fetched, null);
         
         if (fetched == null || fetched.size == 0)
             return null;
@@ -658,7 +658,7 @@ private class Geary.Imap.Folder : BaseObject {
             cmds.add(new ExpungeCommand());
         }
         
-        yield exec_commands_async(cmds, null, null, cancellable);
+        yield exec_commands_async(cmds, cancellable, null, null);
     }
     
     public async void mark_email_async(Gee.List<MessageSet> msg_sets, Geary.EmailFlags? flags_to_add,
@@ -682,7 +682,7 @@ private class Geary.Imap.Folder : BaseObject {
                 cmds.add(new StoreCommand(msg_set, msg_flags_remove, StoreCommand.Option.REMOVE_FLAGS));
         }
         
-        yield exec_commands_async(cmds, null, null, cancellable);
+        yield exec_commands_async(cmds, cancellable, null, null);
     }
     
     // Returns a mapping of the source UID to the destination UID.  If the MessageSet is not for
@@ -695,7 +695,7 @@ private class Geary.Imap.Folder : BaseObject {
             new MailboxSpecifier.from_folder_path(destination, this.delim));
 
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
-            Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
+            Geary.iterate<Command>(cmd).to_array_list(), cancellable, null, null);
         
         if (!responses.has_key(cmd))
             return null;
@@ -742,7 +742,7 @@ private class Geary.Imap.Folder : BaseObject {
         cmds.add(new SearchCommand.uid(criteria));
         
         Gee.Set<Imap.UID>? search_results;
-        yield exec_commands_async(cmds, null, out search_results, cancellable);
+        yield exec_commands_async(cmds, cancellable, null, out search_results);
         if (search_results == null || search_results.size == 0)
             return null;
         

@@ -50,8 +50,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     }
     
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
+        Cancellable? cancellable = null, out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high) throws Error {
         low = null;
         high = null;
         

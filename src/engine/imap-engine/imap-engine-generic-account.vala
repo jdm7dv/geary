@@ -355,12 +355,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         try {
             bool folder_created;
             Imap.Folder remote_folder = yield remote.fetch_folder_async(folder.path,
-                out folder_created, null, cancellable);
+                null, cancellable, out folder_created);
             
             // if created, don't need to fetch count because it was fetched when it was created
             int unseen, total;
             if (!folder_created) {
-                yield remote.fetch_counts_async(folder.path, out unseen, out total, cancellable);
+                yield remote.fetch_counts_async(folder.path, cancellable, out unseen, out total);
                 remote_folder.properties.set_status_unseen(unseen);
                 remote_folder.properties.set_status_message_count(total, false);
             } else {
@@ -435,7 +435,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // startup of the UI), enumerate the remote folders
         bool remote_folders_suspect;
         Gee.HashMap<FolderPath, Imap.Folder>? remote_folders = yield enumerate_remote_folders_async(
-            null, out remote_folders_suspect, cancellable);
+            null, cancellable, out remote_folders_suspect);
         
         // pair the local and remote folders and make sure everything is up-to-date
         yield update_folders_async(existing_folders, remote_folders, remote_folders_suspect, cancellable);
@@ -467,7 +467,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
     
     private async Gee.HashMap<FolderPath, Imap.Folder> enumerate_remote_folders_async(
-        Geary.FolderPath? parent, out bool results_suspect, Cancellable? cancellable) throws Error {
+        Geary.FolderPath? parent, Cancellable? cancellable, out bool results_suspect) throws Error {
         results_suspect = false;
         check_open();
         
@@ -491,7 +491,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                     bool recursive_results_suspect;
                     Collection.map_set_all<FolderPath, Imap.Folder>(result,
                         yield enumerate_remote_folders_async(
-                        remote_child.path, out recursive_results_suspect, cancellable));
+                        remote_child.path, cancellable, out recursive_results_suspect));
                     if (recursive_results_suspect)
                         results_suspect = true;
                 }
@@ -545,7 +545,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 continue;
             
             Imap.Folder remote_folder = (Imap.Folder) yield remote.fetch_folder_async(folder,
-                null, null, cancellable);
+                null, cancellable, null);
             
             yield local.clone_folder_async(remote_folder, cancellable);
         }

@@ -643,8 +643,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 ImapDB.Folder.ListFlags.NONE, cancellable);
             
             debug("Fetching information for remote folder %s", to_string());
-            opening_folder = yield remote.fetch_folder_async(local_folder.get_path(), null, local_status,
-                cancellable);
+            opening_folder = yield remote.fetch_folder_async(local_folder.get_path(), local_status,
+                                                             cancellable, null);
             
             debug("Opening remote folder %s", opening_folder.to_string());
             yield opening_folder.open_async(cancellable);
@@ -1025,8 +1025,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
     
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
+        Cancellable? cancellable = null, out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high) throws Error {
         low = null;
         high = null;
         

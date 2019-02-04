@@ -83,8 +83,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     }
     
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
+        Cancellable? cancellable = null, out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high) throws Error {
         SmtpOutboxEmailIdentifier? outbox_low = null;
         SmtpOutboxEmailIdentifier? outbox_high = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {

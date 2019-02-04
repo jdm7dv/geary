@@ -473,8 +473,8 @@ public abstract class Geary.Folder : BaseObject {
      * in the folder.  If none of the given set are in the folder, return null.
      */
     public abstract async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error;
+                                                     Cancellable? cancellable = null,
+        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high) throws Error;
     
     /**
      * List emails from the {@link Folder} starting at a particular location within the vector

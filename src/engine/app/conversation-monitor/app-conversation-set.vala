@@ -134,10 +134,10 @@ private class Geary.App.ConversationSet : BaseObject {
     
     public async void add_all_emails_async(Gee.Collection<Geary.Email> emails,
         ConversationMonitor monitor, Geary.FolderPath? preferred_folder_path,
+        Cancellable? cancellable,
         out Gee.Collection<Conversation> added,
         out Gee.MultiMap<Conversation, Geary.Email> appended,
-        out Gee.Collection<Conversation> removed_due_to_merge,
-        Cancellable? cancellable) throws Error {
+        out Gee.Collection<Conversation> removed_due_to_merge) throws Error {
         // Get known paths for all emails
         Gee.Map<Geary.EmailIdentifier, Geary.Email>? id_map = Email.emails_to_map(emails);
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? id_to_paths = null;
@@ -389,8 +389,9 @@ private class Geary.App.ConversationSet : BaseObject {
     
     public async void remove_emails_and_check_in_folder_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Account account,
-        Geary.FolderPath required_folder_path, out Gee.Collection<Conversation> removed,
-        out Gee.MultiMap<Conversation, Geary.Email> trimmed, Cancellable? cancellable) {
+        Geary.FolderPath required_folder_path, Cancellable? cancellable,
+        out Gee.Collection<Conversation> removed,
+        out Gee.MultiMap<Conversation, Geary.Email> trimmed) {
         Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Geary.Email> _trimmed
             = new Gee.HashMultiMap<Conversation, Geary.Email>();

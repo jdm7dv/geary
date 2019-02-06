@@ -1,15 +1,16 @@
-
-JavascriptResult
-    .get_global_context nullable=false unowned=true
-    .get_value nullable=false unowned=true
-
 //Forward upstream
 Download
   .failed#signal.error type="WebKit.DownloadError"
+JavascriptResult
+  .get_global_context type="unowned JS.GlobalContext" skip=false
+  .get_value type="unowned JS.Value" skip=false
 PrintOperation
   .failed#signal.error type="WebKit.PrintError"
 WebResource
   .failed#signal.error type="GLib.Error"
 WebView
+  .get_javascript_global_context type="unowned JS.GlobalContext" skip=false
   .load_failed#signal.error type="GLib.Error"
-  .show_option_menu#signal skip
+  .show_option_menu#signal name="on_show_option_menu"
+
+*.ref unowned

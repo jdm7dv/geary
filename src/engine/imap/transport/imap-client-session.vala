@@ -1497,11 +1497,20 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         if (params.err != null)
             throw params.err;
-        
-        if(params.proceed)
+
+        if (params.proceed) {
             yield command_transaction_async(cmd, cancellable);
+            logged_out();
+            this.cx.disconnect_async.begin(
+                cancellable, (obj, res) => {
+                    dispatch_disconnect_results(
+                        DisconnectReason.LOCAL_CLOSE, res
+                    );
+                }
+            );
+        }
     }
-    
+
     private uint on_logout(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
 
@@ -1545,15 +1554,16 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     private uint on_logging_out_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
-        
+
+        debug("[%s] Received completion for logout: %s",
+              to_string(), completion_response.to_string());
+
         if (!validate_state_change_cmd(completion_response))
             return state;
-        
-        fsm.do_post_transition(() => { logged_out(); });
-        
+
         return State.LOGGED_OUT;
     }
-    
+
     //
     // disconnect
     //

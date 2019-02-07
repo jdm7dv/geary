@@ -482,10 +482,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
         fsm.set_logging(false);
     }
-    
+
     ~ClientSession() {
         switch (fsm.get_state()) {
             case State.UNCONNECTED:
+            case State.LOGGED_OUT:
             case State.BROKEN:
                 // no problem-o
             break;
@@ -496,7 +497,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         debug("DTOR: ClientSession %s", to_string());
     }
-    
+
     public MailboxSpecifier? get_current_mailbox() {
         return current_mailbox;
     }

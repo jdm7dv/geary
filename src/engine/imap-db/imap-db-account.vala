@@ -355,6 +355,8 @@ private class Geary.ImapDB.Account : BaseObject {
         });
         
         initialize_contacts(cancellable);
+
+        debug("Account opened");
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {

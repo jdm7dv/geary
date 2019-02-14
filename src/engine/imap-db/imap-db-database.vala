@@ -83,6 +83,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
         if (cancellable != null)
             cancellable.cancelled.disconnect(cancel_gc);
+
+        debug("Database opened");
     }
 
     private void on_reap_async_completed(Object? object, AsyncResult result) {

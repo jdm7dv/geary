@@ -110,7 +110,7 @@ private class Geary.ImapDB.GC {
 
         RecommendedOperation op = RecommendedOperation.NONE;
         if (!yield has_message_rows(cancellable)) {
-            // No message rows exist, so don't bother vacuuming
+            debug("[%s] No recommending GC: no messages exist", to_string());
             return op;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -12,9 +12,13 @@ int main(string[] args) {
 
     Test.init(ref args);
 
+    Geary.Logging.init();
+    Geary.Logging.init();
+    Geary.Logging.log_to(stderr);
+    GLib.Log.set_default_handler(Geary.Logging.default_handler);
+
     Geary.RFC822.init();
     Geary.HTML.init();
-    Geary.Logging.init();
 
     /*
      * Hook up all tests into appropriate suites

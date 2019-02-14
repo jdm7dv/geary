@@ -360,18 +360,18 @@ private class Geary.ImapDB.Account : BaseObject {
     public async void close_async(Cancellable? cancellable) throws Error {
         if (db == null)
             return;
-        
+
+        this.background_cancellable.cancel();
+        this.background_cancellable = null;
+
+        this.folder_refs.clear();
+
         // close and always drop reference
         try {
             db.close(cancellable);
         } finally {
             db = null;
         }
-
-        this.background_cancellable.cancel();
-        this.background_cancellable = null;
-
-        this.folder_refs.clear();
     }
 
     public async Folder clone_folder_async(Geary.Imap.Folder imap_folder,

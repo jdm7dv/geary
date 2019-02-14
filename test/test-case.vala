@@ -304,6 +304,7 @@ public abstract class TestCase : Object {
 
 		public void set_up(void* fixture) {
             try {
+                debug("%s: setting up", this.name);
                 this.test_case.set_up();
             } catch (Error err) {
                 assert_no_error(err);
@@ -312,6 +313,7 @@ public abstract class TestCase : Object {
 
 		public void run(void* fixture) {
             try {
+                debug("%s: running test", this.name);
                 this.test();
             } catch (Error err) {
                 assert_no_error(err);
@@ -320,6 +322,7 @@ public abstract class TestCase : Object {
 
 		public void tear_down(void* fixture) {
             try {
+                debug("%s: tearing down", this.name);
                 this.test_case.tear_down();
             } catch (Error err) {
                 assert_no_error(err);

@@ -119,8 +119,28 @@ public class Geary.Endpoint : BaseObject {
         this.tls_method = method;
     }
 
-    public async SocketConnection connect_async(Cancellable? cancellable = null) throws Error {
-        return yield get_socket_client().connect_async(this.remote, cancellable);
+    public async GLib.SocketConnection connect_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        GLib.SocketClient client = get_socket_client();
+        GLib.IOError? connect_error = null;
+        try {
+            return yield client.connect_async(this.remote, cancellable);
+        } catch (GLib.IOError.NETWORK_UNREACHABLE err) {
+            connect_error = err;
+        }
+
+        // Ubuntu 18.04 for some reason started throwing these errors
+        // when an AAAA record was resolved for host name but no valid
+        // IPv6 network was available. Work around by re-attempting
+        // once using IPv4 only. See issue #217.
+        client.family = GLib.SocketFamily.IPV4;
+        try {
+            return yield client.connect_async(this.remote, cancellable);
+        } catch (GLib.Error err) {
+            debug("Connect error while working around network unavailable: %s",
+                  err.message);
+            throw connect_error;
+        }
     }
 
     public async TlsClientConnection starttls_handshake_async(IOStream base_stream,

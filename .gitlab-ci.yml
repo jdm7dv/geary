@@ -2,7 +2,7 @@
 # Geary CI config.
 #
 
-include: 'https://gitlab.gnome.org/GNOME/citemplates/raw/master/flatpak/flatpak_ci_initiative.yml'
+include: 'https://gitlab.gnome.org/mjog/citemplates/raw/wip/test-args/flatpak/flatpak_ci_initiative.yml'
 
 variables:
   # Flatpak CI vars
